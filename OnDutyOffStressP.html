@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>On Duty, Off Stress</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
+  :root {
+    --navy:#1A2B4A; --steel:#3A5A8C; --gold:#B8963E; --gold-lt:#F5EDD6;
+    --blue-lt:#EBF2FA; --cream:#FDFAF5; --pale:#F3F5F8; --rule:#C8D0DC;
+    --mid:#666; --dark:#1E1E1E; --white:#fff; --green:#2E7D52; --green-lt:#E8F5EE;
+    --r:14px; --sh:0 2px 16px rgba(26,43,74,.10);
+    --fb:'DM Sans',system-ui,sans-serif; --fh:'DM Serif Display',Georgia,serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--fb);background:var(--pale);color:var(--dark);min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+  /* TOPBAR */
+  .topbar{background:var(--navy);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.25);}
+  .tbi{max-width:680px;margin:0 auto;padding:13px 16px 9px;}
+  .tbi h1{font-family:var(--fh);font-size:1.15rem;color:#fff;line-height:1.2;}
+  .tbi p{font-size:.68rem;color:rgba(255,255,255,.5);margin-top:2px;text-transform:uppercase;letter-spacing:.05em;}
+
+  /* TABS */
+  .tabs{background:var(--navy);overflow-x:auto;scrollbar-width:none;padding:0 16px;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tabs-row{display:flex;gap:4px;max-width:680px;margin:0 auto;}
+  .tab{flex-shrink:0;background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);font-family:var(--fb);font-size:.77rem;font-weight:600;padding:8px 12px;border-radius:8px 8px 0 0;cursor:pointer;transition:all .2s;white-space:nowrap;}
+  .tab.active{background:var(--pale);color:var(--navy);font-weight:700;}
+  .tab:not(.active):hover{background:rgba(255,255,255,.15);color:#fff;}
+
+  /* POINTS STRIP */
+  .pts-strip{background:var(--gold-lt);border-bottom:1.5px solid var(--gold);}
+  .psi{max-width:680px;margin:0 auto;padding:9px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .pts-lbl{font-size:.68rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;}
+  .pts-row{display:flex;align-items:center;gap:8px;margin-top:3px;}
+  .pts-num{font-family:var(--fh);font-size:1.65rem;color:var(--gold);line-height:1;}
+  .bar-wrap{flex:1;height:6px;background:rgba(184,150,62,.2);border-radius:99px;overflow:hidden;}
+  .bar-fill{height:100%;background:var(--gold);border-radius:99px;transition:width .5s ease;}
+  .pts-nxt{font-size:.7rem;color:var(--steel);font-weight:600;text-align:right;max-width:130px;}
+
+  /* MAIN */
+  .main{max-width:680px;margin:0 auto;padding:16px 16px 80px;}
+
+  /* CARD */
+  .card{background:#fff;border-radius:var(--r);box-shadow:var(--sh);margin-bottom:11px;overflow:hidden;}
+  .card-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;}
+  .card-hd-l{display:flex;align-items:center;gap:9px;}
+  .ci{width:29px;height:29px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;}
+  .ci-gold{background:var(--gold-lt);} .ci-blue{background:var(--blue-lt);}
+  .ci-green{background:var(--green-lt);} .ci-cream{background:var(--cream);border:1px solid var(--rule);}
+  .card-hd h3{font-size:.9rem;font-weight:700;color:var(--navy);}
+  .chev{font-size:.68rem;color:var(--mid);transition:transform .25s;}
+  .card.open .chev{transform:rotate(180deg);}
+  .card-bd{display:none;padding:0 14px 13px;border-top:1px solid var(--pale);}
+  .card.open .card-bd{display:block;}
+
+  /* WK HEADER */
+  .wk-hdr{display:flex;align-items:flex-start;gap:13px;margin-bottom:16px;}
+  .wk-badge{background:var(--steel);color:#fff;border-radius:10px;min-width:54px;height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
+  .wk-badge span:first-child{font-size:.56rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.7;}
+  .wk-badge span:last-child{font-family:var(--fh);font-size:1.7rem;line-height:1;}
+  .wk-ttl h2{font-family:var(--fh);font-size:1.35rem;color:var(--navy);line-height:1.2;}
+  .wk-theme{font-size:.84rem;color:var(--mid);font-style:italic;margin-top:3px;line-height:1.4;}
+
+  /* SCIENCE */
+  .sci{font-size:.9rem;line-height:1.65;color:var(--dark);font-style:italic;background:var(--cream);border-left:3px solid var(--gold);padding:10px 12px 10px 13px;border-radius:0 8px 8px 0;margin-top:11px;}
+
+  /* TOOLS */
+  .tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:11px;}
+  @media(max-width:380px){.tools-grid{grid-template-columns:1fr;}}
+  .tc{background:var(--cream);border:1px solid var(--rule);border-radius:9px;padding:8px 10px;}
+  .tc h4{font-size:.8rem;font-weight:700;color:var(--steel);margin-bottom:2px;}
+  .tc p{font-size:.76rem;color:var(--mid);line-height:1.4;}
+
+  /* CHECKLIST */
+  .hw-intro{font-size:.88rem;color:var(--dark);margin:10px 0 8px;line-height:1.55;}
+  .cl{list-style:none;}
+  .cl li{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid var(--pale);cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .cl li:last-child{border-bottom:none;}
+  .cb{width:20px;height:20px;border:2px solid var(--rule);border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:1px;font-size:.78rem;color:transparent;background:#fff;}
+  .cl li.ck .cb{background:var(--green);border-color:var(--green);color:#fff;}
+  .ct{font-size:.87rem;line-height:1.5;color:var(--dark);transition:all .2s;}
+  .cl li.ck .ct{text-decoration:line-through;color:var(--mid);opacity:.6;}
+
+  /* FB */
+  .fb-box{background:#EEF3FF;border:1px solid #C5D3F0;border-radius:9px;padding:10px 12px;margin-top:10px;}
+  .fb-lbl{font-size:.7rem;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
+  .fb-txt{font-size:.85rem;color:#334;line-height:1.5;font-style:italic;}
+  .copy-btn{display:inline-flex;align-items:center;gap:4px;background:var(--steel);color:#fff;border:none;border-radius:20px;padding:5px 12px;font-family:var(--fb);font-size:.75rem;font-weight:600;margin-top:8px;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;}
+  .copy-btn.copied{background:var(--green);}
+
+  /* ACTIONS */
+  .action-grid{display:flex;flex-direction:column;gap:8px;margin-top:11px;}
+  .ai{display:flex;align-items:center;justify-content:space-between;background:var(--pale);border:1.5px solid var(--rule);border-radius:11px;padding:11px 12px;gap:9px;transition:all .2s;}
+  .ai.done{background:var(--green-lt);border-color:var(--green);opacity:.55;}
+  .ai-l{flex:1;}
+  .ai-name{font-size:.9rem;font-weight:600;color:var(--navy);}
+  .ai-desc{font-size:.76rem;color:var(--mid);margin-top:2px;line-height:1.35;}
+  .ai-r{display:flex;align-items:center;gap:7px;flex-shrink:0;}
+  .pts-badge{background:var(--gold-lt);border:1.5px solid var(--gold);border-radius:20px;padding:2px 8px;font-size:.75rem;font-weight:700;color:var(--navy);white-space:nowrap;}
+  .log-btn{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-family:var(--fb);font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;-webkit-tap-highlight-color:transparent;}
+  .log-btn:active{transform:scale(.96);}
+  .log-btn.done{background:var(--green);cursor:default;}
+
+  /* HISTORY */
+  .h-lbl{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--mid);margin-bottom:7px;margin-top:14px;}
+  .hl{list-style:none;}
+  .hl li{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--pale);font-size:.81rem;}
+  .hl li:last-child{border-bottom:none;}
+  .h-name{color:var(--dark);font-weight:500;}
+  .h-meta{color:var(--mid);font-size:.72rem;text-align:right;}
+  .h-pts{color:var(--green);font-weight:700;}
+  .no-h{font-size:.84rem;color:var(--mid);font-style:italic;padding:9px 0;}
+
+  /* PRIZES */
+  .prize-row{display:flex;align-items:flex-start;gap:11px;padding:9px 0;border-bottom:1px solid var(--pale);}
+  .prize-row:last-child{border-bottom:none;}
+  .pe{font-size:1.4rem;flex-shrink:0;margin-top:1px;}
+  .pi h4{font-size:.86rem;font-weight:700;color:var(--navy);}
+  .pi p{font-size:.78rem;color:var(--mid);line-height:1.4;margin-top:2px;}
+  .prize-row.locked{opacity:.35;}
+  .prize-row.unlocked .pi h4{color:var(--green);}
+
+  /* PROTOCOL */
+  .pf{margin-top:10px;}
+  .pf-row{margin-bottom:10px;}
+  .pf-row label{display:block;font-size:.73rem;font-weight:700;color:var(--steel);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+  .pf-row input,.pf-row textarea,.pf-row select{width:100%;background:var(--pale);border:1.5px solid var(--rule);border-radius:8px;padding:8px 10px;font-family:var(--fb);font-size:.9rem;color:var(--dark);transition:border-color .2s;-webkit-appearance:none;}
+  .pf-row input:focus,.pf-row textarea:focus,.pf-row select:focus{outline:none;border-color:var(--steel);background:#fff;}
+  .pf-row textarea{resize:vertical;min-height:56px;}
+  .save-btn{width:100%;background:var(--navy);color:#fff;border:none;border-radius:10px;padding:12px;font-family:var(--fb);font-size:.96rem;font-weight:700;cursor:pointer;margin-top:4px;transition:background .2s;-webkit-tap-highlight-color:transparent;}
+  .save-btn:active{background:var(--steel);}
+  .save-ok{display:none;text-align:center;color:var(--green);font-size:.85rem;font-weight:600;padding:8px 0 0;}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;padding:10px 20px;border-radius:24px;font-size:.87rem;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.3);transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+
+  /* TRACKER INTRO */
+  .trk-intro{font-size:.87rem;color:var(--mid);line-height:1.55;margin:10px 0 14px;font-style:italic;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tbi">
+    <h1>On Duty, Off Stress</h1>
+    <p>Regulation Under Pressure · UMB Police Department · Catarina De Sousa Henriques</p>
+  </div>
+</div>
+
+<div class="tabs"><div class="tabs-row" id="tabsRow"></div></div>
+
+<div class="pts-strip">
+  <div class="psi">
+    <div style="flex:1">
+      <div class="pts-lbl">Regulation Points</div>
+      <div class="pts-row">
+        <div class="pts-num" id="ptsNum">0</div>
+        <div class="bar-wrap"><div class="bar-fill" id="ptsBar"></div></div>
+      </div>
+    </div>
+    <div class="pts-nxt" id="ptsNxt">30 pts to Bronze!</div>
+  </div>
+</div>
+
+<div class="main" id="main"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────
+const WEEKS=[
+  {num:1,title:"Know Your Nervous System",theme:"Awareness is the first intervention.",
+   science:"Your nervous system runs in 3 states: <b>Ventral Vagal</b> — calm, clear, connected. <b>Sympathetic</b> — wired, reactive, hypervigilant. <b>Dorsal Vagal</b> — numb, flat, exhausted. Most officers live in Sympathetic even off duty. You cannot regulate what you cannot first recognize. Tonight you learned to name which state you are in — and feel it in your body.",
+   toolsLabel:"What We Practiced",
+   tools:[{name:"Body Scan",desc:"Seated, head to toe. No fixing — just noticing temperature, weight, tension, ease."},{name:"State Check",desc:"Wired / Flat / Grounded. Name it. Naming alone begins to shift the state."},{name:"Progressive Relaxation",desc:"Tense and release from feet to face. Your built-in reset switch."}],
+   hwIntro:"Every morning, before your uniform goes on or you sit at your desk:",
+   steps:["Take 3 slow breaths.","Ask: What state am I in right now?  Wired? Flat? Grounded?","Type one word into your phone notes. That's the whole practice."],
+   fb:"Explain the 3 nervous system states to one person this week. Post to the UMB PD Facebook page: 'Here is what I learned about my own nervous system.' #ThriveSquadUMB"},
+  {num:2,title:"Your Breath Is Your Remote Control",theme:"The only part of your stress response you can consciously override.",
+   science:"Every slow exhale activates your vagus nerve — the biological brake pedal of your stress response. The ratio matters: <b>exhale longer than you inhale</b> and your parasympathetic nervous system engages. Tonight you learned 3 techniques — one for each real situation you face on and off duty.",
+   toolsLabel:"Your 3 Breath Tools",
+   tools:[{name:"Box Breathing",desc:"Inhale 4 · Hold 4 · Exhale 4 · Hold 4. Before a difficult call or situation."},{name:"Extended Exhale",desc:"Inhale 4 · Exhale 6–8. For traffic, stress, winding down, sleep."},{name:"Physiological Sigh",desc:"Double inhale through nose · Long slow exhale. Fastest cortisol drop. 30 seconds."}],
+   hwIntro:"Once per day, use one technique at the moment stress is rising — not after:",
+   steps:["Before getting out of the patrol car.","Before a hard conversation.","Before walking through your front door at home.","Note what you used and what shifted."],
+   fb:"Teach Box Breathing to someone — a partner, a colleague, a kid. Post: 'Box Breathing. Works in the patrol car.' #ThriveSquadUMB"},
+  {num:3,title:"Unwind the Body",theme:"Your body has been keeping score — let's help it reset.",
+   science:"Chronic stress lives in your neck, jaw, hips, and lower back — not just your mind. The body needs to <b>physically complete</b> the stress response it never got to finish. Tonight's seated tension release and somatic shake help discharge stored tension from your nervous system. No mat. No floor. No equipment.",
+   toolsLabel:"Your 5-Minute Desk Sequence",
+   tools:[{name:"Seated Figure-Four",desc:"60 sec each side. Hips and lower back."},{name:"Eagle Arms",desc:"60 sec each side. Upper back and shoulders."},{name:"Neck Release",desc:"60 sec each side. Gravity only — no pulling."},{name:"Wrist Fans",desc:"30 sec. Hands and forearms."},{name:"Physiological Sigh",desc:"3 rounds. Always close with this."},{name:"Somatic Shake",desc:"Bounce heels, let it rise. Discharge stored tension."}],
+   hwIntro:"Once per day — morning, midday, or end of shift. No equipment needed.",
+   steps:["Follow the sequence above in order.","Set a phone alarm labeled: '5 min for me.'","Notice where tension lives in your body. It will begin to shift."],
+   fb:"Walk a colleague through the desk sequence. Post: '5 minutes at your desk — no mat, no floor, no excuses.' #ThriveSquadUMB"},
+  {num:4,title:"Find Your Ground",theme:"Safety is something you can create — anywhere, anytime.",
+   science:"Your nervous system is always scanning for danger — a process called neuroception. After years of high-alert work, it can misread safe environments as threatening. You walk through your front door at home and you are still braced. Tonight you built a <b>personal anchor</b> — a repeatable action that reliably signals safety to your specific nervous system.",
+   toolsLabel:"Anchor Options — Find Yours",
+   tools:[{name:"Hand on Heart",desc:"3 slow breaths. Simple. Works anywhere."},{name:"Hum 30 Seconds",desc:"Low tone directly activates the vagus nerve."},{name:"Feet Into Floor",desc:"Press down, feel the floor push back. 3 breaths."},{name:"Cool Water",desc:"Wrists or back of neck. Fast vagal stimulation."},{name:"5-4-3-2-1 Orienting",desc:"5 see · 4 feel · 3 hear · 2 smell · 1 taste. Biological safety signal."},{name:"Hand on Neck",desc:"Your own hand's weight. Self-soothing reflex."}],
+   hwIntro:"The anchor that worked for you tonight — use it at least once per day:",
+   steps:["Before your shift starts.","After an intense call or difficult situation.","Before you walk through your front door at home."],
+   fb:"Teach the 5-4-3-2-1 orienting practice to one person. Post: 'This is how you tell your nervous system you are safe. Takes 60 seconds.' #ThriveSquadUMB"},
+  {num:5,title:"Restore & Refill",theme:"Burnout is not a character flaw — it is a biology problem.",
+   science:"Burnout is a chronic cortisol deficit — the tank runs dry and there is nothing left to regulate from. Rest is not a reward. It is <b>maintenance</b>. Tonight's slow yin practice and extended relaxation reduce cortisol, improve heart rate variability (HRV — a direct measure of nervous system resilience), and improve sleep quality. All from a chair. No mat required.",
+   toolsLabel:"Your Yin Sequence — Hold Each 3–5 Min",
+   tools:[{name:"Seated Forward Fold",desc:"Low back and hamstrings. Let gravity do the work."},{name:"Seated Butterfly",desc:"Inner hips and groin. Naturally activates the parasympathetic."},{name:"Seated Spinal Twist",desc:"Thoracic spine and digestion. Both sides."},{name:"Legs Elevated",desc:"Feet on desk or second chair. Lymph drainage and blood pressure."}],
+   hwIntro:"10 minutes every Sunday. Treat it like a non-negotiable appointment:",
+   steps:["3 min — Extended exhale breathing (inhale 4 · exhale 8).","5 min — Seated forward fold or any yin pose from tonight.","2 min — Eyes closed, silent intention for the week ahead.","Set your Sunday alarm right now."],
+   fb:"Post to the UMB PD Facebook page after your first Sunday Reset: 'I did it. Here is what I noticed.' #ThriveSquadUMB"},
+  {num:6,title:"Build Your Daily Practice",theme:"The best practice is the one you will actually do.",
+   science:"Over 5 weeks you received 15+ real tools. Tonight is not about adding more — it is about finding <b>2 or 3 that are genuinely yours</b> and attaching them to something you already do every day. This is called <b>habit stacking</b>, and it is the most reliable method for lasting behavioral change. Five intentional minutes outperforms 30 distracted ones every time.",
+   toolsLabel:"Your Personal Protocol",tools:[],
+   hwIntro:"Complete the protocol card below, then commit to one simple thing:",
+   steps:["Choose your anchor moment — the existing habit you stack this onto.","Run your protocol for one full week and notice what changes.","Post to Facebook: 'My daily practice is ___ . I chose it because ___ .'","Tag a colleague. Invite them to build theirs."],
+   fb:"Share your completed protocol on the UMB PD Facebook page. Tag two colleagues and challenge them to build their own. #ThriveSquadUMB"},
+];
+
+const ACTIONS=[
+  {id:"breath",   label:"I used a breath tool today",      desc:"Box breathing, physiological sigh, or extended exhale — any one counts",pts:2,rep:true},
+  {id:"sequence", label:"I did my desk sequence",          desc:"The 5-minute seated sequence — any time of day",                       pts:3,rep:true},
+  {id:"anchor",   label:"I used my anchor when stressed",  desc:"Hand on heart, grounding, humming, 5-4-3-2-1 — whatever is yours",     pts:2,rep:true},
+  {id:"reset",    label:"I did my Sunday Reset",           desc:"10 minutes of slow yin + breath + intention",                          pts:3,rep:true},
+  {id:"teach",    label:"I taught someone a tool",         desc:"Showed a colleague, partner, or kid anything from this series",        pts:5,rep:true},
+  {id:"share",    label:"I shared what shifted",           desc:"Posted on Facebook: what changed, what you noticed, what helped",      pts:4,rep:true},
+  {id:"week7",    label:"One full week of daily practice", desc:"Any single tool, used every day for 7 days in a row",                  pts:8,rep:false},
+  {id:"protocol", label:"I built my daily protocol",       desc:"Completed the Week 6 protocol card and saved it",                     pts:5,rep:false},
+];
+
+const PRIZES=[
+  {emoji:"🥉",thr:30,  label:"Bronze — 30 pts", desc:"\"Nervous System Basics\" digital toolkit + certificate of completion"},
+  {emoji:"🥈",thr:55,  label:"Silver — 55 pts", desc:"Wellness gift basket + private 30-min session with Catarina De Sousa Henriques"},
+  {emoji:"🥇",thr:80,  label:"Gold — 80 pts",   desc:"Private 1:1 wellness deep-dive + featured recognition post"},
+  {emoji:"🏆",thr:9999,label:"Teach-Back Champion",desc:"Special recognition award + month of continued coaching sessions"},
+];
+
+// ── STATE ─────────────────────────────────────────────────────────
+function load(){try{return JSON.parse(localStorage.getItem('ods3')||'{}');}catch{return{};}}
+function save(){try{localStorage.setItem('ods3',JSON.stringify(S));}catch{}}
+let S=load();
+if(!S.pts)S.pts=0; if(!S.checks)S.checks={}; if(!S.hist)S.hist=[];
+if(!S.once)S.once={}; if(!S.proto)S.proto={}; if(!S.cards)S.cards={};
+let cur=S.last||0;
+
+// ── RENDER ────────────────────────────────────────────────────────
+function render(){renderTabs();renderMain();renderStrip();}
+
+function renderTabs(){
+  const row=document.getElementById('tabsRow');row.innerHTML='';
+  const mkTab=(label,val)=>{
+    const b=document.createElement('button');
+    b.className='tab'+(cur===val?' active':'');b.textContent=label;
+    b.onclick=()=>{cur=val;S.last=val;save();render();};
+    row.appendChild(b);
+  };
+  mkTab('⭐ Points',0);
+  WEEKS.forEach(w=>mkTab('Wk '+w.num,w.num));
+}
+
+function renderStrip(){
+  const pts=S.pts||0;
+  document.getElementById('ptsNum').textContent=pts;
+  const nx=PRIZES.find(p=>pts<p.thr)||PRIZES[PRIZES.length-1];
+  const pr=PRIZES[PRIZES.indexOf(nx)-1];
+  const st=pr?pr.thr:0;
+  const en=nx.thr<9999?nx.thr:st+25;
+  document.getElementById('ptsBar').style.width=Math.min(100,((pts-st)/(en-st))*100)+'%';
+  document.getElementById('ptsNxt').textContent=
+    pts>=80?'🏆 Gold unlocked!':
+    pts>=55?`🥇 ${80-pts} pts to Gold`:
+    pts>=30?`🥈 ${55-pts} pts to Silver`:
+    `${30-pts} pts to Bronze`;
+}
+
+function renderMain(){
+  const m=document.getElementById('main');m.innerHTML='';
+  const tp=buildTracker();tp.style.display=cur===0?'block':'none';m.appendChild(tp);
+  WEEKS.forEach(w=>{const p=buildWeek(w);p.style.display=w.num===cur?'block':'none';m.appendChild(p);});
+}
+
+// ── TRACKER PANEL ────────────────────────────────────────────────
+function buildTracker(){
+  const d=document.createElement('div');
+  d.innerHTML=`
+    <div style="margin-bottom:14px;">
+      <h2 style="font-family:var(--fh);font-size:1.35rem;color:var(--navy);line-height:1.2;">Your Regulation Points</h2>
+      <p style="font-size:.86rem;color:var(--mid);margin-top:5px;font-style:italic;line-height:1.55;">
+        Points are earned by <b style="font-style:normal;color:var(--dark)">doing</b> — not by attending. No matter how many sessions you joined, every tool you use right now counts.
+      </p>
+    </div>`;
+  d.appendChild(card('trk-act','⚡','ci-gold','Log an Action — Earn Points',actionsHTML()));
+  d.appendChild(card('trk-prz','🏆','ci-gold','Prizes & Progress',prizesHTML()));
+  d.appendChild(card('trk-hist','📋','ci-cream','Your Activity Log',histHTML()));
+  return d;
+}
+
+function actionsHTML(){
+  return `<div class="action-grid">${ACTIONS.map(a=>{
+    const done=!a.rep&&S.once[a.id];
+    return`<div class="ai${done?' done':''}" id="ai-${a.id}">
+      <div class="ai-l"><div class="ai-name">${a.label}</div><div class="ai-desc">${a.desc}</div></div>
+      <div class="ai-r">
+        <span class="pts-badge">+${a.pts}</span>
+        <button class="log-btn${done?' done':''}" ${done?'disabled':''} onclick="${done?'':'logAction(\''+a.id+'\')'}">${done?'✓ Done':'Log it'}</button>
+      </div></div>`;
+  }).join('')}</div>`;
+}
+
+function prizesHTML(){
+  const pts=S.pts||0;
+  return`<div style="margin-top:10px;">${PRIZES.map(p=>{
+    const u=pts>=p.thr;
+    return`<div class="prize-row ${u?'unlocked':'locked'}">
+      <div class="pe">${p.emoji}</div>
+      <div class="pi"><h4>${p.label}${u?' — Unlocked! 🎉':''}</h4><p>${p.desc}</p></div></div>`;
+  }).join('')}</div>
+  <div style="margin-top:13px;padding-top:11px;border-top:1px solid var(--pale);">
+    <div class="h-lbl">How every point is earned</div>
+    ${ACTIONS.map(a=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--pale);gap:8px;">
+        <span style="font-size:.83rem;color:var(--dark);line-height:1.3;">${a.label}</span>
+        <span style="font-weight:700;color:var(--steel);font-size:.83rem;flex-shrink:0;">+${a.pts}${a.rep?' ↻':''}</span>
+      </div>`).join('')}
+    <p style="font-size:.72rem;color:var(--mid);margin-top:6px;">↻ = can be logged multiple times</p>
+  </div>`;
+}
+
+function histHTML(){
+  const h=S.hist||[];
+  if(!h.length)return`<p class="no-h">No actions logged yet — use a tool and come back!</p>`;
+  return`<ul class="hl">${[...h].reverse().slice(0,40).map(e=>`
+    <li><span class="h-name">${e.label}</span>
+    <div><span class="h-pts">+${e.pts}</span><div class="h-meta">${e.date}</div></div></li>`).join('')}</ul>`;
+}
+
+// ── WEEK PANEL ────────────────────────────────────────────────────
+function buildWeek(w){
+  const d=document.createElement('div');
+  d.innerHTML=`<div class="wk-hdr">
+    <div class="wk-badge"><span>Week</span><span>${w.num}</span></div>
+    <div class="wk-ttl"><h2>${w.title}</h2><p class="wk-theme">${w.theme}</p></div>
+  </div>`;
+  d.appendChild(card(`sci-${w.num}`,'🧬','ci-gold',"This Week's Science",
+    `<div class="sci">${w.science}</div>`));
+  if(w.num===6){
+    d.appendChild(card(`tools-${w.num}`,'📋','ci-cream','Your Personal Protocol — Fill In & Save',protoHTML()));
+  } else if(w.tools.length){
+    d.appendChild(card(`tools-${w.num}`,'🛠','ci-cream',w.toolsLabel,
+      `<div class="tools-grid">${w.tools.map(t=>`<div class="tc"><h4>${t.name}</h4><p>${t.desc}</p></div>`).join('')}</div>`));
+  }
+  d.appendChild(card(`hw-${w.num}`,'📝','ci-blue','Practice Reminders',hwHTML(w)));
+  d.appendChild(card(`fb-${w.num}`,'📲','ci-blue','Facebook Teach-Back',
+    `<div class="fb-box"><div class="fb-lbl">This week's prompt</div>
+     <div class="fb-txt" id="fbt-${w.num}">${w.fb}</div></div>
+     <button class="copy-btn" id="cpb-${w.num}" onclick="cpFB(${w.num})">📋 Copy prompt</button>`));
+  return d;
+}
+
+function hwHTML(w){
+  const ch=S.checks[w.num]||[];
+  return`<p class="hw-intro">${w.hwIntro}</p>
+  <ul class="cl">${w.steps.map((s,i)=>`
+    <li class="${ch.includes(i)?'ck':''}" onclick="toggleCheck(${w.num},${i})">
+      <div class="cb">${ch.includes(i)?'✓':''}</div>
+      <span class="ct">${s}</span></li>`).join('')}</ul>`;
+}
+
+function protoHTML(){
+  const p=S.proto;
+  return`<div class="pf">
+    <div class="pf-row"><label>When I'll do it</label>
+      <select id="pw" onchange="sp()">
+        <option ${p.w==='morning'?'selected':''} value="morning">Morning</option>
+        <option ${p.w==='shift'?'selected':''} value="shift">End of Shift</option>
+        <option ${p.w==='evening'?'selected':''} value="evening">Evening</option>
+      </select></div>
+    <div class="pf-row"><label>My habit stack — right after I…</label>
+      <input id="ps" type="text" placeholder="e.g. pour my morning coffee" value="${p.s||''}" oninput="sp()"></div>
+    <div class="pf-row"><label>Step 1 — 60 sec</label>
+      <input id="p1" type="text" placeholder="e.g. Box Breathing" value="${p.p1||''}" oninput="sp()"></div>
+    <div class="pf-row"><label>Step 2 — 60 sec</label>
+      <input id="p2" type="text" placeholder="e.g. Neck Release" value="${p.p2||''}" oninput="sp()"></div>
+    <div class="pf-row"><label>Step 3 — 90 sec</label>
+      <input id="p3" type="text" placeholder="e.g. Seated Forward Fold" value="${p.p3||''}" oninput="sp()"></div>
+    <div class="pf-row"><label>Step 4 — 90 sec</label>
+      <input id="p4" type="text" placeholder="e.g. Physiological Sigh x3" value="${p.p4||''}" oninput="sp()"></div>
+    <div class="pf-row"><label>My personal anchor</label>
+      <input id="pa" type="text" placeholder="e.g. Hand on heart + 3 breaths" value="${p.a||''}" oninput="sp()"></div>
+    <div class="pf-row"><label>My reason for doing this</label>
+      <textarea id="pr" placeholder="What matters most to you…" oninput="sp()">${p.r||''}</textarea></div>
+    <button class="save-btn" onclick="confirmProto()">Save My Protocol</button>
+    <div class="save-ok" id="save-ok">✓ Saved to your device — it'll be here next time you open this.</div>
+  </div>`;
+}
+
+// ── CARD BUILDER ──────────────────────────────────────────────────
+function card(id,icon,iconClass,title,body){
+  const isOpen=S.cards[id]!==false;
+  const el=document.createElement('div');
+  el.className='card'+(isOpen?' open':'');el.id='c-'+id;
+  el.innerHTML=`<div class="card-hd" onclick="toggleCard('${id}')">
+    <div class="card-hd-l"><div class="ci ${iconClass}">${icon}</div><h3>${title}</h3></div>
+    <span class="chev">▼</span></div>
+  <div class="card-bd">${body}</div>`;
+  return el;
+}
+
+// ── ACTIONS ───────────────────────────────────────────────────────
+function toggleCard(id){
+  const el=document.getElementById('c-'+id);if(!el)return;
+  S.cards[id]=el.classList.toggle('open');save();
+}
+function toggleCheck(wn,i){
+  if(!S.checks[wn])S.checks[wn]=[];
+  const a=S.checks[wn],p=a.indexOf(i);
+  if(p>-1)a.splice(p,1);else a.push(i);
+  save();render();
+}
+function logAction(id){
+  const a=ACTIONS.find(x=>x.id===id);if(!a)return;
+  if(!a.rep&&S.once[id])return;
+  if(!a.rep)S.once[id]=true;
+  S.pts=(S.pts||0)+a.pts;
+  const d=new Date();
+  S.hist.push({label:a.label,pts:a.pts,date:d.toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})});
+  if(S.hist.length>200)S.hist=S.hist.slice(-200);
+  save();toast(`+${a.pts} pts — ${a.label} ✓`);render();
+  setTimeout(()=>{const e=document.getElementById('ptsNum');if(e)e.scrollIntoView({behavior:'smooth',block:'center'});},200);
+}
+function sp(){
+  const g=id=>{const e=document.getElementById(id);return e?e.value:'';};
+  S.proto={w:g('pw'),s:g('ps'),p1:g('p1'),p2:g('p2'),p3:g('p3'),p4:g('p4'),a:g('pa'),r:g('pr')};
+  save();
+}
+function confirmProto(){
+  sp();
+  const ok=document.getElementById('save-ok');if(ok)ok.style.display='block';
+  if(!S.once['protocol']){
+    S.once['protocol']=true;S.pts=(S.pts||0)+5;
+    S.hist.push({label:'Built my daily protocol',pts:5,date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})});
+    save();toast('Protocol saved — +5 pts! ✅');render();
+  } else {toast('Protocol updated and saved!');renderStrip();}
+}
+function cpFB(n){
+  const el=document.getElementById('fbt-'+n),btn=document.getElementById('cpb-'+n);
+  if(!el||!btn)return;
+  const txt=el.textContent;
+  const done=()=>{btn.textContent='✓ Copied!';btn.classList.add('copied');setTimeout(()=>{btn.textContent='📋 Copy prompt';btn.classList.remove('copied');},2200);};
+  if(navigator.clipboard)navigator.clipboard.writeText(txt).then(done).catch(()=>fbCopy(txt,done));
+  else fbCopy(txt,done);
+}
+function fbCopy(t,cb){const ta=document.createElement('textarea');ta.value=t;ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);cb();}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+
+// ── INIT ──────────────────────────────────────────────────────────
+render();
+setTimeout(()=>{const a=document.querySelector('.tab.active');if(a)a.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});},100);
+</script>
+</body>
+</html>
